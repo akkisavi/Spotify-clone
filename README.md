@@ -1,0 +1,1 @@
+Built a fully functional Spotify clone with advanced music playback features and integrated real-time chat functionality, combining seamless audio streaming with social connectivity. Developed using cutting-edge technologies to deliver a dynamic and engaging user experience.![Uploading Screenshot 2025-01-14 153214.png…]()
