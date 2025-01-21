@@ -6,11 +6,21 @@ import Topbar from "@/components/Topbar.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PlayButton from "./PlayButton.tsx";
 
+import React from "react";
+import { usePlayerStore } from "@/stores/usePlayerStore";
+import AudioPlayer from "@/stores/AudioPlayer.tsx";
+
 const ShowAll = () => {
   const [songs, setSongs] = useState<Song[]>([]);
   const [filteredSongs, setFilteredSongs] = useState<Song[]>([]); // Holds filtered songs based on search
   const [loading, setLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const initializeQueue = usePlayerStore((state) => state.initializeQueue);
+  useEffect(() => {
+    // Initialize the queue with songs when loaded
+    initializeQueue(songs);
+  }, [songs]);
 
   // Fetch all songs when the component mounts
   useEffect(() => {

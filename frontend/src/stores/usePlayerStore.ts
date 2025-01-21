@@ -28,8 +28,8 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   initializeQueue: (songs: Song[]) => {
     set({
       queue: songs,
-      currentSong: get().currentSong || songs[0],
-      currentIndex: get().currentIndex === -1 ? 0 : get().currentIndex,
+      currentSong: songs[0] || null,
+      currentIndex: songs.length > 0 ? 0 : -1,
     });
   },
 
@@ -37,14 +37,6 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     if (songs.length === 0) return;
 
     const song = songs[startIndex];
-
-    const socket = useChatStore.getState().socket;
-    if (socket.auth) {
-      socket.emit("update_activity", {
-        userId: socket.auth.userId,
-        activity: `Playing ${song.title} by ${song.artist}`,
-      });
-    }
     set({
       queue: songs,
       currentSong: song,
@@ -56,14 +48,6 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   setCurrentSong: (song: Song | null) => {
     if (!song) return;
 
-    const socket = useChatStore.getState().socket;
-    if (socket.auth) {
-      socket.emit("update_activity", {
-        userId: socket.auth.userId,
-        activity: `Playing ${song.title} by ${song.artist}`,
-      });
-    }
-
     const songIndex = get().queue.findIndex((s) => s._id === song._id);
     set({
       currentSong: song,
@@ -73,69 +57,48 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   },
 
   togglePlay: () => {
-    const willStartPlaying = !get().isPlaying;
-
-    const currentSong = get().currentSong;
-    const socket = useChatStore.getState().socket;
-    if (socket.auth) {
-      socket.emit("update_activity", {
-        userId: socket.auth.userId,
-        activity:
-          willStartPlaying && currentSong
-            ? `Playing ${currentSong.title} by ${currentSong.artist}`
-            : "Idle",
-      });
-    }
-
-    set({
-      isPlaying: willStartPlaying,
-    });
+    set((state) => ({
+      isPlaying: !state.isPlaying,
+    }));
   },
 
   playNext: () => {
     const { currentIndex, queue, isLooping } = get();
-    const nextSongIndex = currentIndex + 1;
+    const nextIndex = currentIndex + 1;
 
-    if (nextSongIndex < queue.length) {
-      const nextSong = queue[nextSongIndex];
+    if (nextIndex < queue.length) {
       set({
-        currentSong: nextSong,
+        currentSong: queue[nextIndex],
+        currentIndex: nextIndex,
         isPlaying: true,
-        currentIndex: nextSongIndex,
       });
-    }
-    // If the next index is out of bounds and looping is enabled, loop back to the first song
-    else if (isLooping) {
-      const firstSong = queue[0];
+    } else if (isLooping) {
       set({
-        currentSong: firstSong,
-        isPlaying: true,
+        currentSong: queue[0],
         currentIndex: 0,
-      });
-    }
-    // If the next index is out of bounds and no loop, stop the player
-    else {
-      set({ isPlaying: false });
-    }
-  },
-
-  playPrevious: () => {
-    const { currentIndex, queue } = get();
-    const previousSongIndex = currentIndex - 1;
-
-    if (previousSongIndex >= 0) {
-      const previousSong = queue[previousSongIndex];
-      set({
-        currentSong: previousSong,
         isPlaying: true,
-        currentIndex: previousSongIndex,
       });
     } else {
       set({ isPlaying: false });
     }
   },
 
+  playPrevious: () => {
+    const { currentIndex, queue } = get();
+    const previousIndex = currentIndex - 1;
+
+    if (previousIndex >= 0) {
+      set({
+        currentSong: queue[previousIndex],
+        currentIndex: previousIndex,
+        isPlaying: true,
+      });
+    }
+  },
+
   toggleLoop: () => {
-    set({ isLooping: !get().isLooping });
+    set((state) => ({
+      isLooping: !state.isLooping,
+    }));
   },
 }));
