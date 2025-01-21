@@ -6,9 +6,8 @@ import Topbar from "@/components/Topbar.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PlayButton from "./PlayButton.tsx";
 
-import React from "react";
 import { usePlayerStore } from "@/stores/usePlayerStore";
-import AudioPlayer from "@/stores/AudioPlayer.tsx";
+
 
 const ShowAll = () => {
   const [songs, setSongs] = useState<Song[]>([]);
